@@ -1,4 +1,4 @@
-package com.github.onlinemallpay;
+package com.github.eric.onlinemallpay;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
