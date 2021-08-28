@@ -5,6 +5,7 @@ import com.github.eric.onlinemallpay.enums.PayPlatformEnum;
 import com.github.eric.onlinemallpay.generate.entity.PayInfo;
 import com.github.eric.onlinemallpay.generate.mapper.PayInfoMapper;
 import com.github.eric.onlinemallpay.service.impl.PaySerive;
+import com.lly835.bestpay.config.WxPayConfig;
 import com.lly835.bestpay.enums.BestPayPlatformEnum;
 import com.lly835.bestpay.enums.BestPayTypeEnum;
 import com.lly835.bestpay.enums.OrderStatusEnum;
@@ -29,6 +30,9 @@ public class PayController {
 
     @Autowired
     MyPayInfoMapper myPayInfoMapper;
+
+    @Autowired
+    WxPayConfig wxPayConfig;
 
     @GetMapping("/aaa")
     public ModelAndView aaa() {
@@ -56,6 +60,9 @@ public class PayController {
         HashMap<String, String> map = new HashMap<>();
         if (bestPayTypeEnum.equals(BestPayTypeEnum.WXPAY_NATIVE)) {
             map.put("codeUrl", payResponse.getCodeUrl());
+            map.put("orderId",orderId);
+            map.put("returnUrl",wxPayConfig.getReturnUrl());
+
             return new ModelAndView("createForWxNative", map);
         } else if (bestPayTypeEnum.equals(BestPayTypeEnum.ALIPAY_PC)) {
             map.put("body", payResponse.getBody());
@@ -84,7 +91,7 @@ public class PayController {
             // 未支付
             // 判断异步通知的金额与数据库的金额进行比较
             if(payInfo.getPayAmount().compareTo(BigDecimal.valueOf(payResponse.getOrderAmount()))!=0){
-                // 抛出异常之前发短信或其他方式通知开发人员，出现了不正常的情况
+                // 抛出异常之前应该发短信或其他方式通知开发人员，出现了不正常的情况
                 throw new RuntimeException("异步通知的金额与数据库中的不一致，"+"order_no="+payResponse.getOrderId());
             }
             // 修改订单的支付状态
@@ -94,6 +101,8 @@ public class PayController {
             payInfoMapper.updateByPrimaryKeySelective(payInfo);
         }
 
+        //TODO online-mall-pay需要发送MQ消息，online-mall接收MQ消息
+
         // 返回消息给微信或支付宝，不要在回调了
         if (payResponse.getPayPlatformEnum().equals(BestPayPlatformEnum.WX)) {
             return new WxOrderQueryResponse("SUCCESS", "成功");
@@ -101,6 +110,12 @@ public class PayController {
             return "success";
         }
         throw new RuntimeException("支付异步通知中错误的支付平台");
+    }
+
+    @GetMapping("/queryByOrderId")
+    @ResponseBody
+    public Object asyncNotify(@RequestParam("orderId") Long orderId) {
+        return myPayInfoMapper.selectByOrderNo(orderId);
     }
 
     static class WxOrderQueryResponse {

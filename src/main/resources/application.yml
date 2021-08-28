@@ -4,3 +4,20 @@ spring:
     username: root
     password: root
     driverClassName: com.mysql.cj.jdbc.Driver
+
+wxpay:
+  appId: xxxxx
+  mchId: xxxxx
+  mchKey: xxxxx
+  notifyUrl: http://xxx/pay/notify
+  returnUrl: http://xxx
+
+alipay:
+  appId: xxxxxx
+  privateKey: xxxxxx
+  publicKey: xxxxxx
+  notifyUrl: http://xxx/pay/notify
+  returnUrl: http://xxx
+
+
+

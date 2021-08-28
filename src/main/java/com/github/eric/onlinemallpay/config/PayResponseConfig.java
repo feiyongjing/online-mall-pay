@@ -10,31 +10,40 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PayResponseConfig {
 
+
+
     @Bean
-    public BestPayService newPayResponse(){
-        //微信配置
-        WxPayConfig wxPayConfig = new WxPayConfig();
-        wxPayConfig.setAppId("xxxxx");          //公众号Id
-//        wxPayConfig.setMiniAppId("xxxxx");      //小程序Id
-//        wxPayConfig.setAppAppId("xxxxx");       //移动AppId
-//支付商户资料
-        wxPayConfig.setMchId("xxxxxx");
-        wxPayConfig.setMchKey("xxxxxxx");
-        wxPayConfig.setNotifyUrl("http://xxxxx"+"/pay/notify");
-
-        // 支付宝配置
-        AliPayConfig aliPayConfig = new AliPayConfig();
-        aliPayConfig.setAppId("xxxxxx");
-        aliPayConfig.setPrivateKey("xxxxxx");
-        aliPayConfig.setAliPayPublicKey("xxxxxx");
-        aliPayConfig.setReturnUrl("http://xxxxx"); // 同步跳转页面，不保证支付成功
-        aliPayConfig.setNotifyUrl("http://xxxxx"+"/pay/notify"); // 异步支付结果通知
-
+    public BestPayService newPayResponse(WxPayConfig wxPayConfig, AliPayConfig aliPayConfig){
         BestPayServiceImpl bestPayService = new BestPayServiceImpl();
         bestPayService.setWxPayConfig(wxPayConfig);
         bestPayService.setAliPayConfig(aliPayConfig);
 
         return bestPayService;
+    }
+
+    @Bean
+    public WxPayConfig wxPayConfig(WxAccountConfig wxAccountConfig){
+        //微信配置
+        WxPayConfig wxPayConfig = new WxPayConfig();
+        wxPayConfig.setAppId(wxAccountConfig.getAppId());          //公众号Id
+        //支付商户资料
+        wxPayConfig.setMchId(wxAccountConfig.getMchId());
+        wxPayConfig.setMchKey(wxAccountConfig.getMchKey());
+        wxPayConfig.setNotifyUrl(wxAccountConfig.getNotifyUrl());
+        wxPayConfig.setReturnUrl(wxAccountConfig.getReturnUrl());
+        return wxPayConfig;
+    }
+
+    @Bean
+    public AliPayConfig aliPayConfig(AlipayAccountConfig alipayAccountConfig){
+        // 支付宝配置
+        AliPayConfig aliPayConfig = new AliPayConfig();
+        aliPayConfig.setAppId(alipayAccountConfig.getAppId());
+        aliPayConfig.setPrivateKey(alipayAccountConfig.getPrivateKey());
+        aliPayConfig.setAliPayPublicKey(alipayAccountConfig.getPublicKey());
+        aliPayConfig.setReturnUrl(alipayAccountConfig.getReturnUrl()); // 同步跳转页面，不保证支付成功
+        aliPayConfig.setNotifyUrl(alipayAccountConfig.getNotifyUrl()); // 异步支付结果通知
+        return aliPayConfig;
     }
 
 }
