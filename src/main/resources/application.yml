@@ -5,6 +5,10 @@ spring:
     password: root
     driverClassName: com.mysql.cj.jdbc.Driver
 
+mybatis:
+  config-location: classpath:db/mybatis/config.xml
+
+
 wxpay:
   appId: xxxxx
   mchId: xxxxx
