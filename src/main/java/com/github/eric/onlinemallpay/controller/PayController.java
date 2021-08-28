@@ -34,12 +34,6 @@ public class PayController {
     @Autowired
     WxPayConfig wxPayConfig;
 
-    @GetMapping("/aaa")
-    public ModelAndView aaa() {
-        // 下单，订单信息写入数据库
-        return new ModelAndView("index");
-    }
-
     @GetMapping("/create")
     public ModelAndView create(@RequestParam("orderId") String orderId,
                                @RequestParam("amount") BigDecimal amount,
