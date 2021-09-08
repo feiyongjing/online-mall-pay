@@ -1,15 +1,17 @@
 package com.github.eric.onlinemallpay.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.github.eric.onlinemallpay.dao.MyPayInfoMapper;
 import com.github.eric.onlinemallpay.enums.PayPlatformEnum;
 import com.github.eric.onlinemallpay.generate.entity.PayInfo;
 import com.github.eric.onlinemallpay.generate.mapper.PayInfoMapper;
-import com.github.eric.onlinemallpay.service.impl.PaySerive;
+import com.github.eric.onlinemallpay.service.impl.PaySeriveImpl;
 import com.lly835.bestpay.config.WxPayConfig;
 import com.lly835.bestpay.enums.BestPayPlatformEnum;
 import com.lly835.bestpay.enums.BestPayTypeEnum;
 import com.lly835.bestpay.enums.OrderStatusEnum;
 import com.lly835.bestpay.model.PayResponse;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +24,10 @@ import java.util.Objects;
 @Controller
 @RequestMapping("/pay")
 public class PayController {
+
+    private static final String QUEUE_PAY_NOTIFY="payNotify";
     @Autowired
-    private PaySerive paySerive;
+    private PaySeriveImpl paySeriveImpl;
 
     @Autowired
     PayInfoMapper payInfoMapper;
@@ -33,6 +37,9 @@ public class PayController {
 
     @Autowired
     WxPayConfig wxPayConfig;
+
+    @Autowired
+    AmqpTemplate amqpTemplate;
 
     @GetMapping("/create")
     public ModelAndView create(@RequestParam("orderId") String orderId,
@@ -49,7 +56,7 @@ public class PayController {
         // 解决重复支付就要调用支付平台的API关闭上一次的支付
 
         //请求支付
-        PayResponse payResponse = paySerive.create(orderId, amount, bestPayTypeEnum);
+        PayResponse payResponse = paySeriveImpl.create(orderId, amount, bestPayTypeEnum);
 
         HashMap<String, String> map = new HashMap<>();
         if (bestPayTypeEnum.equals(BestPayTypeEnum.WXPAY_NATIVE)) {
@@ -71,7 +78,7 @@ public class PayController {
     @ResponseBody
     public Object asyncNotify(@RequestBody String notifyData) {
         // 验签
-        PayResponse payResponse = paySerive.asyncNotify(notifyData);
+        PayResponse payResponse = paySeriveImpl.asyncNotify(notifyData);
 
         // 金额校验(从数据库查金额)
         PayInfo payInfo = myPayInfoMapper.selectByOrderNo(Long.valueOf(payResponse.getOrderId()));
@@ -95,7 +102,8 @@ public class PayController {
             payInfoMapper.updateByPrimaryKeySelective(payInfo);
         }
 
-        //TODO online-mall-pay需要发送MQ消息，online-mall接收MQ消息
+        // TODO online-mall-pay需要发送MQ消息，online-mall接收MQ消息
+        amqpTemplate.convertAndSend(QUEUE_PAY_NOTIFY, JSON.toJSON(payInfo));
 
         // 返回消息给微信或支付宝，不要在回调了
         if (payResponse.getPayPlatformEnum().equals(BestPayPlatformEnum.WX)) {

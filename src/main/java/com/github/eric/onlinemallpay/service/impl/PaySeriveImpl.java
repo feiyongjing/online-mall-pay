@@ -1,7 +1,6 @@
 package com.github.eric.onlinemallpay.service.impl;
 
-import com.github.eric.onlinemallpay.service.BaseService;
-import com.lly835.bestpay.config.AliPayConfig;
+import com.github.eric.onlinemallpay.service.PayService;
 import com.lly835.bestpay.enums.BestPayTypeEnum;
 import com.lly835.bestpay.model.PayRequest;
 import com.lly835.bestpay.model.PayResponse;
@@ -12,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 @Service
-public class PaySerive implements BaseService {
+public class PaySeriveImpl implements PayService {
     @Autowired
     BestPayService bestPayService;
 
