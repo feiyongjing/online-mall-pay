@@ -25,14 +25,6 @@ public class PayInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    public PayInfo(Long orderNo, Integer payPlatform, String platformNumber, String platformStatus, BigDecimal payAmount) {
-        this.orderNo = orderNo;
-        this.payPlatform = payPlatform;
-        this.platformNumber = platformNumber;
-        this.platformStatus = platformStatus;
-        this.payAmount = payAmount;
-    }
-
     public Integer getId() {
         return id;
     }

@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class PayResponseConfig {
 
-
-
     @Bean
     public BestPayService newPayResponse(WxPayConfig wxPayConfig, AliPayConfig aliPayConfig){
         BestPayServiceImpl bestPayService = new BestPayServiceImpl();

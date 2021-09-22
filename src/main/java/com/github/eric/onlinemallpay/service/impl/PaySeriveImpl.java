@@ -28,8 +28,6 @@ public class PaySeriveImpl implements PayService {
         payRequest.setOrderName("微信公众账号支付订单");
         payRequest.setOrderAmount(amount.doubleValue());
 
-
-
 //        payRequest.setOpenid("openid_xxxxxx");
         PayResponse payResponse = bestPayService.pay(payRequest);
         return payResponse;
